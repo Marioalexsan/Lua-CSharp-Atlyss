@@ -283,6 +283,9 @@ partial class LuaObjectGenerator
             {
                 foreach (var propertyMetadata in typeMetadata.Properties)
                 {
+                    if (!propertyMetadata.AllowRead)
+                        continue;
+
                     var conversionPrefix = GetLuaValuePrefix(propertyMetadata.Type, references, compilation);
                     if (propertyMetadata.IsStatic)
                     {
@@ -331,7 +334,7 @@ partial class LuaObjectGenerator
 
                     using (builder.BeginIndentScope())
                     {
-                        if (propertyMetadata.IsReadOnly)
+                        if (!propertyMetadata.AllowWrite)
                         {
                             builder.AppendLine($@"throw new global::Lua.LuaRuntimeException(context.State, $""'{{key}}' cannot overwrite."");");
                         }

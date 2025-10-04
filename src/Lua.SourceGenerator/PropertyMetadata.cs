@@ -8,7 +8,8 @@ public class PropertyMetadata
     public ITypeSymbol Type { get; }
     public string TypeFullName { get; }
     public bool IsStatic { get; }
-    public bool IsReadOnly { get; }
+    public bool AllowRead { get; }
+    public bool AllowWrite { get; }
     public string LuaMemberName { get; }
 
     public PropertyMetadata(ISymbol symbol, SymbolReferences references)
@@ -16,18 +17,21 @@ public class PropertyMetadata
         Symbol = symbol;
 
         IsStatic = symbol.IsStatic;
+        AllowRead = AllowWrite = false;
 
         if (symbol is IFieldSymbol field)
         {
             Type = field.Type;
             TypeFullName = field.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-            IsReadOnly = field.IsReadOnly;
+            AllowRead = field.DeclaredAccessibility == Accessibility.Public;
+            AllowWrite = !field.IsReadOnly && field.DeclaredAccessibility == Accessibility.Public;
         }
         else if (symbol is IPropertySymbol property)
         {
             Type = property.Type;
             TypeFullName = property.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-            IsReadOnly = property.SetMethod == null;
+            AllowRead = property.GetMethod != null && property.GetMethod.DeclaredAccessibility == Accessibility.Public;
+            AllowWrite = property.SetMethod != null && property.SetMethod.DeclaredAccessibility == Accessibility.Public;
         }
         else
         {

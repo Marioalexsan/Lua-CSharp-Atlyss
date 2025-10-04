@@ -511,8 +511,16 @@ public readonly struct LuaValue : IEquatable<LuaValue>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public LuaValue(ILuaUserData value)
     {
-        Type = LuaValueType.UserData;
-        referenceValue = value;
+        if (value == null)
+        {
+            Type = LuaValueType.Nil;
+            referenceValue = null;
+        }
+        else
+        {
+            Type = LuaValueType.UserData;
+            referenceValue = value;
+        }
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
